@@ -1,48 +1,41 @@
 <?php
 
+require_once 'functions.php';
+
 try {
-    // データベースに接続
-    $dsn = 'mysql:dbname=todo;host=localhost';
-    $user = 'root';
-    $password = '';
-    $dbh = new PDO($dsn, $user, $password);
-    $dbh->query('SET NAMES utf8mb4');
+
+    // データベースに接続する
+    $dbh = connect_db();
 
     if (isset($_POST['action'])) {
+
         switch ($_POST['action']) {
             case 'add':
-                // データベースにタスクを登録する
                 if (isset($_POST['date']) and isset($_POST['task'])) {
+
                     $date = $_POST['date'];
                     $task = $_POST['task'];
 
-                    // SQL文で命令を出す
-                    $insert_sql = 'INSERT INTO task (create_date,item) VALUES(?,?)';
-                    $insert_stmt = $dbh->prepare($insert_sql);
-                    $insert_stmt->bindValue(1, $date);
-                    $insert_stmt->bindValue(2, $task);
-                    $insert_stmt->execute();
+                    // データベースにタスクを登録する
+                    register_task($dbh, $date, $task);
 
-                    // データーベースから切断
+                    // データベースから切断
                     $dbh = null;
                 }
                 break;
 
             case 'change':
-                // データベースの更新、削除
-                $update_sql = "UPDATE task SET done=? WHERE id=?";
-                $delete_sql = "DELETE FROM task WHERE id=?";
-                $update_stmt = $dbh->prepare($update_sql);
-                $delete_stmt = $dbh->prepare($delete_sql);
-
                 $index = 0;
+
                 while (isset($_POST['id'][$index])) {
                     $id = $_POST['id'][$index];
-                    $deleted = isset($_POST['deleted'][$index]);
+                    $is_deleted = isset($_POST['deleted'][$index]);
 
-                    if ($deleted == true) {
-                        $delete_stmt->bindValue(1, $id);
-                        $delete_stmt->execute();
+                    if ($is_deleted) {
+
+                        // タスクの削除
+                        delete_task($dbh, $id);
+
                     } else {
                         if (isset($_POST['done'][$index])) {
                             $done = 1;
@@ -50,26 +43,21 @@ try {
                             $done = 0;
                         }
 
-                        $update_stmt->bindValue(1, $done);
-                        $update_stmt->bindValue(2, $id);
-                        $update_stmt->execute();
+                        // タスクの更新
+                        update_task($dbh, $id, $done);
                     }
                     $index++;
                 }
+
                 $dbh = null;
                 break;
         }
 
     }
 
-    // リダイレクト先のURLへ転送する
-    $url = 'todolistdisp.php';
-    header('Location: ' . $url, true, 301);
-    exit;
+    // メインページにリダイレクトする
+    redirect_to_main_page();
 } catch (Exception $ex) {
-
-    // リダイレクト先のURLへ転送する
-    $url = 'error.html';
-    header('Location: ' . $url, true, 301);
-    exit;
+    // エラーページにリダイレクトする
+    redirect_to_error_page();
 }

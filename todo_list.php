@@ -1,20 +1,18 @@
 <?php
 
+// 外部関数の読み込み
+require_once('functions.php');
+
 try {
+    $dbh = connect_db();
+    $list = get_task_list($dbh);
+    $dbh = null;
 
-    // データベースに接続
-    $dsn = 'mysql:dbname=todo;host=localhost;charset=utf8';
-    $user = 'root';
-    $password = '';
-    $dbh = new PDO($dsn, $user, $password);
-    $dbh->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 } catch (Exception $e) {
+    redirect_to_error_page();
 
-    // リダイレクト先のURLへ転送する
-    $url = 'error.html';
-    header('Location: ' . $url, true, 301);
-    exit;
 }
+
 ?>
 <!DOCTYPE html>
 <html lang="ja">
@@ -51,20 +49,6 @@ try {
 
             <?php
 
-// データベースに接続
-$dsn = 'mysql:dbname=todo;host=localhost;charset=utf8';
-$user = 'root';
-$password = '';
-$dbh = new PDO($dsn, $user, $password);
-$dbh->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-
-// SQL文で命令を出す
-$sql = 'SELECT * FROM task WHERE 1';
-$stmt = $dbh->prepare($sql);
-$stmt->execute();
-
-$dbh = null;
-
 print '<form method="post" action="change.php">';
 print '<table>';
 print '<tr>';
@@ -77,7 +61,7 @@ print '</tr>';
 
 $index = 0;
 
-$list = $stmt->fetchAll(PDO::FETCH_ASSOC);
+// タスク一覧を表示
 foreach ($list as $task) {
     print '<tr>';
     print '<td>' . $task['id'] . '</td>';
