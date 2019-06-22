@@ -1,71 +1,75 @@
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-<meta charset="UTF-8" />
-<title>データーベース変更テスト</title>
-</head>
-<body>
-
 <?php
 
 try {
-// データベースに接続
+    // データベースに接続
     $dsn = 'mysql:dbname=todo;host=localhost';
     $user = 'root';
     $password = '';
     $dbh = new PDO($dsn, $user, $password);
     $dbh->query('SET NAMES utf8mb4');
 
-// print $_POST['id'][0];
-    // print $_POST['done'][0];
-    // print $_POST['deleted'][0];
+    if (isset($_POST['action'])) {
+        switch ($_POST['action']) {
+            case 'add':
+                // データベースにタスクを登録する
+                if (isset($_POST['date']) and isset($_POST['task'])) {
+                    $date = $_POST['date'];
+                    $task = $_POST['task'];
 
-    $update_sql = "UPDATE task SET done=? WHERE id=?";
-    $delete_sql = "DELETE FROM task WHERE id=?";
-    $update_stmt = $dbh->prepare($update_sql);
-    $delete_stmt = $dbh->prepare($delete_sql);
+                    // SQL文で命令を出す
+                    $insert_sql = 'INSERT INTO task (create_date,item) VALUES(?,?)';
+                    $insert_stmt = $dbh->prepare($insert_sql);
+                    $insert_stmt->bindValue(1, $date);
+                    $insert_stmt->bindValue(2, $task);
+                    $insert_stmt->execute();
 
-    $index = 0;
-    while (isset($_POST['id'][$index])) {
-        $id = $_POST['id'][$index];
-        $deleted = isset($_POST['deleted'][$index]);
+                    // データーベースから切断
+                    $dbh = null;
+                }
+                break;
 
-        if ($deleted == true) {
-            $delete_stmt->bindValue(1, $id);
-            $delete_stmt->execute();
-        } else {
-            if (isset($_POST['done'][$index])) {
-                $done = 1;
-            } else {
-                $done = 0;
-            }
+            case 'change':
+                // データベースの更新、削除
+                $update_sql = "UPDATE task SET done=? WHERE id=?";
+                $delete_sql = "DELETE FROM task WHERE id=?";
+                $update_stmt = $dbh->prepare($update_sql);
+                $delete_stmt = $dbh->prepare($delete_sql);
 
-            // print '<br>';
-            // print "id: $id" . '<br>';
-            // print "done: $done" . '<br>';
-            // print "deleted: $deleted" . '<br>';
+                $index = 0;
+                while (isset($_POST['id'][$index])) {
+                    $id = $_POST['id'][$index];
+                    $deleted = isset($_POST['deleted'][$index]);
 
-            $update_stmt->bindValue(1, $done);
-            $update_stmt->bindValue(2, $id);
-            $update_stmt->execute();
+                    if ($deleted == true) {
+                        $delete_stmt->bindValue(1, $id);
+                        $delete_stmt->execute();
+                    } else {
+                        if (isset($_POST['done'][$index])) {
+                            $done = 1;
+                        } else {
+                            $done = 0;
+                        }
+
+                        $update_stmt->bindValue(1, $done);
+                        $update_stmt->bindValue(2, $id);
+                        $update_stmt->execute();
+                    }
+                    $index++;
+                }
+                $dbh = null;
+                break;
         }
-        $index++;
+
     }
 
-    $dbh = null;
-
-// リダイレクト先のURLへ転送する
-    $url = 'http://localhost:8888/todolist/todolist.php';
+    // リダイレクト先のURLへ転送する
+    $url = 'todolistdisp.php';
     header('Location: ' . $url, true, 301);
-
-// すべての出力を終了
     exit;
-
 } catch (Exception $ex) {
-    print 'エラーが発生しました';
+
+    // リダイレクト先のURLへ転送する
+    $url = 'error.html';
+    header('Location: ' . $url, true, 301);
+    exit;
 }
-
-?>
-
-</body>
-</html>
