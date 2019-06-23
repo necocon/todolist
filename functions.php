@@ -1,4 +1,6 @@
 <?php
+// 外部関数
+
 // データベースに接続する
 function connect_db()
 {
@@ -65,7 +67,7 @@ function redirect_to_error_page()
 // メインページにリダイレクトする
 function redirect_to_main_page()
 {
-    $url = 'todolist.php';
+    $url = 'todo_list.php';
     header('Location: ' . $url, true, 301);
     exit;
 }
