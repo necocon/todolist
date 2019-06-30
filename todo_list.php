@@ -2,7 +2,7 @@
 // タスクの登録をする、タスクの一覧をHTMLで表示する
 
 // 外部関数の読み込み
-require_once('functions.php');
+require_once 'functions.php';
 
 try {
     $dbh = connect_db();
@@ -10,8 +10,9 @@ try {
     $dbh = null;
 
 } catch (Exception $e) {
-    redirect_to_error_page();
-
+    //redirect_to_error_page();
+    var_dump($e); //デバッグ情報
+    exit;
 }
 
 ?>
@@ -39,7 +40,8 @@ try {
                     </tr>
                     <tr>
                         <td>
-                            <input name="date" type="text" value="<?php echo date("Y/m/d"); ?>" style="width:100px">
+                            <!-- <input name="date" type="text" value="<?php echo date("Y/m/d"); ?>" style="width:100px"> -->
+                            <input name="date" type="date" value="<?=date('Y-m-d');?>">
                         </td>
                         <td><input name="task" type="text" style="width:300px" /></td>
                         <td><button name="action" type="submit" value="add">追加</button></td>
@@ -57,33 +59,28 @@ try {
                         <th>削除</th>
                     </tr>
 
-                    <?php $index = 0; ?>
+                    <?php $index = 0;?>
                     <?php //タスク一覧を表示 ?>
                     <?php foreach ($list as $task): ?>
 
-
                     <tr>
-                        <td><?= $task['id'] ?></td>
-                        <td><?= $task['create_date']?></td>
-
                         <?php if ($task['done'] == 0): ?>
-                        <td><?= $task['item'] ?></td>
-                        <td><input type="checkbox" name="done[<?= $index ?>]" value="0"></td>
+                            <td><?=$task['id']?></td>
+                            <td><?=$task['create_date']?></td>
+                            <td><?=$task['item']?></td>
+                            <td><input type="checkbox" name="done[<?=$index?>]" value="0"></td>
                         <?php else: ?>
-                        <td><s><?= $task['item'] ?></s></td>
-                        <td><input type="checkbox" name="done[<?= $index ?>]" value="1" checked="checked"></td>
-                        <?php endif; ?>
+                            <td><s><?=$task['id']?></s></td>
+                            <td><s><?=$task['create_date']?></s></td>
+                            <td><s><?=$task['item']?></s></td>
+                            <td><input type="checkbox" name="done[<?=$index?>]" value="1" checked="checked"></td>
+                        <?php endif;?>
 
-                        <?php if ($task['deleted'] == 0): ?>
-                        <td><input type="checkbox" name="deleted[<?= $index ?>]" value="0"></td>
-                        <?php else: ?>
-                        <td><input type="checkbox" name="deleted[<?= $index ?>]" value="1" checked="checked"></td>
-                        <?php endif; ?>
-
-                        <input type="hidden" name="id[<?= $index ?>]" value="<?= $task['id'] ?>">
+                        <td><input type="checkbox" name="deleted[<?=$index?>]" value="0"></td>
+                        <input type="hidden" name="id[<?=$index?>]" value="<?=$task['id']?>">
                     </tr>
-                    <?php $index++; ?>
-                    <?php endforeach; ?>
+                    <?php $index++;?>
+                    <?php endforeach;?>
 
                 </table>
                 <button name="action" type="submit" value="change">実行</button>

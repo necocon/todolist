@@ -63,4 +63,6 @@ try {
 } catch (Exception $ex) {
     // エラーページにリダイレクトする
     redirect_to_error_page();
+//    var_dump($e);  // エラー確認用
+    exit;
 }

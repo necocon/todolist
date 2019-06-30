@@ -17,7 +17,19 @@ function connect_db()
 // タスク一覧を取得する
 function get_task_list($dbh)
 {
-    $sql = 'SELECT * FROM task WHERE 1';
+
+    // 登録されているToDoリストを取得
+    $sql = '';
+    $sql .= 'SELECT ';
+    $sql .= 'id, ';
+    $sql .= 'create_date, ';
+    $sql .= 'item, ';
+    $sql .= 'done, ';
+    $sql .= 'deleted ';
+    $sql .= 'FROM ';
+    $sql .= 'task';
+
+    //$sql = 'SELECT * FROM task';
     $stmt = $dbh->prepare($sql);
     $stmt->execute();
 
@@ -61,6 +73,7 @@ function redirect_to_error_page()
 {
     $url = 'error.html';
     header('Location: ' . $url, true, 301);
+//    var_dump($e); // エラー確認用
     exit;
 }
 
